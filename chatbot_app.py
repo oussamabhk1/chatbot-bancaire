@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import tempfile
 from utils.working_llama_detection import extract_from_image
-from utils.text_processing import get_answer_from_question, load_faq_data
+from utils.working_llama_textuel import get_answer_from_question, load_faq_data
 
 # Titre et description
 st.set_page_config(page_title="Chatbot Bancaire Multilingue", page_icon="🤖")
