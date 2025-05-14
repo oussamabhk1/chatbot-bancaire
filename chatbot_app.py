@@ -14,8 +14,8 @@ from PIL import Image
 import tempfile
 
 # Import des fonctions utilitaires
-from utils.image_processing import extract_from_image
-from utils.text_processing import get_answer_from_question, load_faq_data
+from utils.working_llama_detection import extract_from_image
+from utils.working_llama_textuel import get_answer_from_question, load_faq_data
 
 # Configuration
 st.set_page_config(page_title="Chatbot Bancaire", page_icon="💬")
