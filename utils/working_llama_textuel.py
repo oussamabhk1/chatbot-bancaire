@@ -7,7 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1Av8mYkJJtH41YE7is7w5Zx7svQq_OxTN
 """
 
-!pip install groq
 from groq import Groq
 import os
 
