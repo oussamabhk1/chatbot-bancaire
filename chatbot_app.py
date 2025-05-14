@@ -2,36 +2,46 @@ import streamlit as st
 import os
 import tempfile
 from utils.working_llama_detection import extract_from_image
-import json
+from utils.text_processing import get_answer_from_question, load_faq_data
 
 # Titre et description
 st.set_page_config(page_title="Chatbot Bancaire Multilingue", page_icon="🤖")
-st.title("📄 Analyse d'image bancaire")
-st.markdown("Uploader une image (facture, relevé bancaire, etc.) et je vais en extraire les informations.")
+st.title("🤖 Chatbot Bancaire Multilingue")
+st.markdown("Posez vos questions liées à la banque (en 🇫🇷, 🇬🇧 ou 🇸🇦), ou envoyez une image.")
 
-# Upload d'image
-uploaded_file = st.file_uploader("Uploader une image", type=["png", "jpg", "jpeg"])
+# Chargement des données FAQ
+faq_data = load_faq_data("cleanedTranslatedBankFAQs.csv")
 
-if uploaded_file is not None:
-    # Créer un répertoire temporaire
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Chemin complet vers l'image uploadée
-        image_path = os.path.join(tmpdir, uploaded_file.name)
-        
-        # Sauvegarder l'image dans le répertoire temporaire
-        with open(image_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        
-        # Dossier de sortie pour le JSON
-        output_dir = os.path.join(tmpdir, "extracted_info_json")
+# Interface utilisateur
+uploaded_file = st.file_uploader("Uploader une image (JPG/PNG)", type=["jpg", "png", "jpeg"])
+user_input = st.text_area("Ou posez votre question ici...")
 
-        # Extraction des données
-        json_file_path = extract_from_image(image_path, output_dir)
+if st.button("Envoyer"):
+    if uploaded_file is not None:
+        # Gestion de l'image
+        with tempfile.TemporaryDirectory() as tmpdir:
+            image_path = os.path.join(tmpdir, uploaded_file.name)
+            
+            # Sauvegarder l'image uploadée
+            with open(image_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            
+            output_dir = os.path.join(tmpdir, "extracted_info_json")
+            
+            # Extraire les données
+            extract_from_image(image_path, output_dir)
 
-        # Charger les données extraites
-        with open(json_file_path, "r", encoding="utf-8") as json_file:
-            extracted_data = json.load(json_file)
+            json_result_path = os.path.join(output_dir, uploaded_file.name.replace(".jpg", ".json").replace(".png", ".json"))
 
-        # Affichage des résultats
-        st.success("✅ Données extraites avec succès !")
-        st.json(extracted_data)
+            with open(json_result_path, "r", encoding="utf-8") as f:
+                extracted_data = json.load(f)
+
+            st.subheader("📄 Données extraites :")
+            st.json(extracted_data)
+
+    elif user_input.strip() != "":
+        # Gestion du texte
+        answer = get_answer_from_question(user_input, faq_data)
+        st.success(f"**💬 Réponse :** {answer}")
+    else:
+        st.warning("Veuillez entrer une question ou télécharger une image.")
